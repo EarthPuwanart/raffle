@@ -334,6 +334,7 @@ function startSpin() {
             <div class="slot-spinning">
                 <div class="spinning-nickname">${s.nickname}</div>
                 <div class="spinning-name">${s.name}</div>
+                <div class="spinning-dept">${s.dept}</div>
             </div>`;
         playTick(600 + Math.random() * 250, 0.025);
         interval += 2;
@@ -348,6 +349,7 @@ function startSpin() {
             <div class="slot-spinning">
                 <div class="spinning-nickname">${s.nickname}</div>
                 <div class="spinning-name">${s.name}</div>
+                <div class="spinning-dept">${s.dept}</div>
             </div>`;
         playTick(350 + (8 - i_tick) * 20, 0.06);
         interval += 50;
@@ -360,6 +362,7 @@ function startSpin() {
                 <div class="slot-spinning slot-decoy">
                     <div class="spinning-nickname decoy-glow">${target.nickname}</div>
                     <div class="spinning-name">${target.name}</div>
+                    <div class="spinning-dept">${target.dept}</div>
                 </div>`;
             playTick(700, 0.15);
             setTimeout(phase3_decide, 1800);
@@ -376,6 +379,7 @@ function startSpin() {
                 <div class="slot-spinning">
                     <div class="spinning-nickname">${finalTarget.nickname}</div>
                     <div class="spinning-name">${finalTarget.name}</div>
+                    <div class="spinning-dept">${finalTarget.dept}</div>
                 </div>`;
             setTimeout(() => revealWinner(finalTarget), 200);
         } else {
@@ -414,6 +418,7 @@ function startSpin() {
             <div class="slot-spinning">
                 <div class="spinning-nickname" style="color:${flash ? '#ef4444' : '#f1f5f9'}">${s.nickname}</div>
                 <div class="spinning-name">${s.name}</div>
+                <div class="spinning-dept">${s.dept}</div>
             </div>`;
         playTick(300 + Math.random() * 300, 0.03, 0.1);
         if (++i_tick < 9) {
