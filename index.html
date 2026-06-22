@@ -47,16 +47,6 @@
                         <span class="mode-label">สุ่มรวมทุกสาขา</span>
                         <span class="mode-count" id="countAll">112 คน</span>
                     </button>
-                    <button class="mode-btn" id="btnMath" onclick="setMode('คณิตศาสตร์')">
-                        <span class="mode-icon">📐</span>
-                        <span class="mode-label">คณิตศาสตร์</span>
-                        <span class="mode-count" id="countMath">37 คน</span>
-                    </button>
-                    <button class="mode-btn" id="btnAppMath" onclick="setMode('คณิตศาสตร์ประยุกต์')">
-                        <span class="mode-icon">📊</span>
-                        <span class="mode-label">คณิตศาสตร์ประยุกต์</span>
-                        <span class="mode-count" id="countAppMath">20 คน</span>
-                    </button>
                     <button class="mode-btn" id="btnDS" onclick="setMode('วิทยาการข้อมูล')">
                         <span class="mode-icon">💾</span>
                         <span class="mode-label">วิทยาการข้อมูล</span>
@@ -66,6 +56,16 @@
                         <span class="mode-icon">📈</span>
                         <span class="mode-label">สถิติฯ</span>
                         <span class="mode-count" id="countStat">40 คน</span>
+                    </button>
+                    <button class="mode-btn" id="btnMath" onclick="setMode('คณิตศาสตร์')">
+                        <span class="mode-icon">📐</span>
+                        <span class="mode-label">คณิตศาสตร์</span>
+                        <span class="mode-count" id="countMath">37 คน</span>
+                    </button>
+                    <button class="mode-btn" id="btnAppMath" onclick="setMode('คณิตศาสตร์ประยุกต์')">
+                        <span class="mode-icon">📊</span>
+                        <span class="mode-label">คณิตศาสตร์ประยุกต์</span>
+                        <span class="mode-count" id="countAppMath">20 คน</span>
                     </button>
                 </div>
             </div>
@@ -102,11 +102,11 @@
                     <div class="winner-dept" id="winnerDept"></div>
                 </div>
                 <div class="winner-actions">
-                    <button class="action-btn remove-btn" id="removeBtn" onclick="removeWinner()">
-                        <span>🚫</span> นำออกจากรายชื่อ
-                    </button>
                     <button class="action-btn keep-btn" id="keepBtn" onclick="keepWinner()">
                         <span>✅</span> เก็บไว้ในรายชื่อ
+                    </button>
+                    <button class="action-btn remove-btn" id="removeBtn" onclick="removeWinner()">
+                        <span>🚫</span> นำออกจากรายชื่อ
                     </button>
                 </div>
             </div>
