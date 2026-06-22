@@ -298,12 +298,12 @@ function startSpin() {
     const winner = available[Math.floor(Math.random() * available.length)];
 
     // 2. Determine number of fakeouts (N)
-    // 50% chance for first fakeout, then halves each time (25%, 12.5%, ...)
+    // 80% chance for first fakeout, then decreases by 20% each time (80%, 60%, 40%, 20%, 0%)
     let N = 0;
-    let prob = 0.5;
-    while (Math.random() < prob) {
+    let prob = 0.8;
+    while (Math.random() < prob && prob > 0.01) {
         N++;
-        prob /= 2;
+        prob -= 0.2;
     }
 
     // 3. Build the sequence of targets (stops)
@@ -390,16 +390,20 @@ function startSpin() {
     function phase4_plottwist() {
         slotDisplay.classList.remove('state-decoy');
         slotDisplay.classList.add('state-plottwist');
+        
+        const twistPhrases = ['ยังไม่ใช่', 'อาจจะยัง', 'โดนหลอก', 'ไปต่ออีกสักหน่อย'];
+        const phrase = twistPhrases[Math.floor(Math.random() * twistPhrases.length)];
+        
         slotDisplay.innerHTML = `
             <div class="slot-spinning slot-plottwist">
-                <div class="plottwist-text">😱 ยังไม่ใช่!!</div>
+                <div class="plottwist-text">😱 ${phrase}</div>
             </div>`;
         // Scary sound
         playTick(160, 0.25, 0.2, 'sawtooth');
         setTimeout(() => playTick(130, 0.2, 0.15, 'sawtooth'), 120);
 
         i_tick = 0;
-        setTimeout(phase5_jolt, 450);
+        setTimeout(phase5_jolt, 1000);
     }
 
     // ── Phase 5: Quick jolt then continue to next target ─────────────────
