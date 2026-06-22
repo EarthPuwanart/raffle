@@ -248,24 +248,9 @@ function playTick(pitch = 880, duration = 0.04, vol = 0.12, type = 'square') {
 
 function playWinFanfare() {
     try {
-        const ctx = getAudioCtx();
-        const notes = [523.25, 659.25, 783.99, 1046.5]; // C5 E5 G5 C6
-        notes.forEach((freq, i) => {
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
-            osc.connect(gain);
-            gain.connect(ctx.destination);
-
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(freq, ctx.currentTime + i * 0.12);
-
-            gain.gain.setValueAtTime(0, ctx.currentTime + i * 0.12);
-            gain.gain.linearRampToValueAtTime(0.25, ctx.currentTime + i * 0.12 + 0.05);
-            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.12 + 0.35);
-
-            osc.start(ctx.currentTime + i * 0.12);
-            osc.stop(ctx.currentTime + i * 0.12 + 0.4);
-        });
+        const audio = new Audio('Congratulations.mp3');
+        audio.volume = 0.7;
+        audio.play();
     } catch (e) {}
 }
 
