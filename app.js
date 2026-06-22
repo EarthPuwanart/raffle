@@ -296,16 +296,18 @@ function startSpin() {
     let earlyWin = false;
     for (let j = 0; j < N; j++) {
         let decoy;
-        // การหลอกครั้งที่ 3 เป็นต้นไป (j >= 3) มีโอกาส 50% ที่จะกลับไปชื่อก่อนหน้า
-        if (j >= 3 && Math.random() < 0.5) {
-            decoy = sequence[j - 1];
+        // หยุดไปแล้ว 2 คน (j >= 2) คนที่ 3 จึงจะมีโอกาสกลับไปเป็นคนที่ 1 (j - 2)
+        if (j >= 2 && Math.random() < 0.5) {
+            decoy = sequence[j - 2];
         } else {
             decoy = available[Math.floor(Math.random() * available.length)];
         }
+        
+        const isDuplicate = sequence.includes(decoy);
         sequence.push(decoy);
 
         // หากมีการหลอกชื่อเดิมแล้ว ชื่อดังกล่าวจะเป็นผู้ชนะทันที
-        if (j > 0 && sequence[j] === sequence[j - 1]) {
+        if (isDuplicate) {
             earlyWin = true;
             break;
         }
