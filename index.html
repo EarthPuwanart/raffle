@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>สุ่มแจกรางวัล | Lucky Draw</title>
+    <meta name="description" content="เว็บไซต์สุ่มแจกรางวัลนักศึกษา สาขาคณิตศาสตร์ คณิตศาสตร์ประยุกต์ วิทยาการข้อมูล สถิติและวิทยาการวิเคราะห์ข้อมูล">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800;900&family=Kanit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Particle canvas background -->
+    <canvas id="particleCanvas"></canvas>
+
+    <!-- Floating decorations -->
+    <div class="floating-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+        <div class="shape shape-4"></div>
+        <div class="shape shape-5"></div>
+    </div>
+
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-glow"></div>
+            <h1 class="title">
+                <span class="title-icon">🎰</span>
+                <span class="title-text">LUCKY DRAW</span>
+                <span class="title-icon">🎰</span>
+            </h1>
+            <p class="subtitle">สุ่มแจกรางวัลนักศึกษา</p>
+        </header>
+
+        <!-- Controls -->
+        <section class="controls-section" id="controlsSection">
+            <div class="mode-selector">
+                <h2 class="section-title">
+                    <span class="section-icon">🎯</span> เลือกรูปแบบการสุ่ม
+                </h2>
+                <div class="mode-buttons">
+                    <button class="mode-btn active" id="btnAll" onclick="setMode('all')">
+                        <span class="mode-icon">🌐</span>
+                        <span class="mode-label">สุ่มรวมทุกสาขา</span>
+                        <span class="mode-count" id="countAll">112 คน</span>
+                    </button>
+                    <button class="mode-btn" id="btnMath" onclick="setMode('คณิตศาสตร์')">
+                        <span class="mode-icon">📐</span>
+                        <span class="mode-label">คณิตศาสตร์</span>
+                        <span class="mode-count" id="countMath">37 คน</span>
+                    </button>
+                    <button class="mode-btn" id="btnAppMath" onclick="setMode('คณิตศาสตร์ประยุกต์')">
+                        <span class="mode-icon">📊</span>
+                        <span class="mode-label">คณิตศาสตร์ประยุกต์</span>
+                        <span class="mode-count" id="countAppMath">20 คน</span>
+                    </button>
+                    <button class="mode-btn" id="btnDS" onclick="setMode('วิทยาการข้อมูล')">
+                        <span class="mode-icon">💾</span>
+                        <span class="mode-label">วิทยาการข้อมูล</span>
+                        <span class="mode-count" id="countDS">15 คน</span>
+                    </button>
+                    <button class="mode-btn" id="btnStat" onclick="setMode('สถิติและวิทยาการวิเคราะห์ข้อมูล')">
+                        <span class="mode-icon">📈</span>
+                        <span class="mode-label">สถิติฯ</span>
+                        <span class="mode-count" id="countStat">40 คน</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slot Machine Display -->
+        <section class="slot-section" id="slotSection">
+            <div class="slot-machine">
+                <div class="slot-frame">
+                    <div class="slot-display" id="slotDisplay">
+                        <div class="slot-placeholder">
+                            <span class="placeholder-icon">🎲</span>
+                            <span class="placeholder-text">กดปุ่มเพื่อสุ่ม</span>
+                        </div>
+                    </div>
+                </div>
+                <button class="spin-btn" id="spinBtn" onclick="startSpin()">
+                    <span class="spin-icon">🎰</span>
+                    <span class="spin-text">สุ่มเลย!</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- Winner Display -->
+        <section class="winner-section hidden" id="winnerSection">
+            <div class="winner-card">
+                <div class="winner-confetti" id="winnerConfetti"></div>
+                <div class="winner-badge">🏆</div>
+                <h2 class="winner-title">ผู้โชคดี!</h2>
+                <div class="winner-info">
+                    <div class="winner-nickname" id="winnerNickname"></div>
+                    <div class="winner-name" id="winnerName"></div>
+                    <div class="winner-id" id="winnerId"></div>
+                    <div class="winner-dept" id="winnerDept"></div>
+                </div>
+                <div class="winner-actions">
+                    <button class="action-btn remove-btn" id="removeBtn" onclick="removeWinner()">
+                        <span>🚫</span> นำออกจากรายชื่อ
+                    </button>
+                    <button class="action-btn keep-btn" id="keepBtn" onclick="keepWinner()">
+                        <span>✅</span> เก็บไว้ในรายชื่อ
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Removed list -->
+        <section class="removed-section" id="removedSection">
+            <h2 class="section-title">
+                <span class="section-icon">🏅</span> ผู้ที่ได้รับรางวัลแล้ว
+                <button class="reset-btn" id="resetBtn" onclick="resetAll()" title="คืนค่าทั้งหมด">
+                    <span>🔄</span> รีเซ็ต
+                </button>
+            </h2>
+            <div class="removed-list" id="removedList">
+                <div class="empty-removed">ยังไม่มีผู้ได้รับรางวัล</div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>🎓 ปรับพื้นฐาน Mix — Lucky Draw System</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

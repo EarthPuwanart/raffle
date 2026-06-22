@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gimmick Demo — ลองแต่ละไอเดีย</title>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600;700;800;900&family=Kanit:wght@700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0a1a;
+            --card: rgba(20,20,50,0.9);
+            --gold: #fbbf24;
+            --purple: #7c3aed;
+            --pink: #ec4899;
+            --cyan: #06b6d4;
+            --green: #22c55e;
+            --red: #ef4444;
+            --text: #f1f5f9;
+            --muted: #64748b;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'Prompt', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            padding: 24px;
+        }
+        h1 {
+            font-family: 'Kanit', sans-serif;
+            font-size: 2rem;
+            font-weight: 900;
+            text-align: center;
+            background: linear-gradient(135deg, #fbbf24, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+        }
+        .subtitle { text-align: center; color: var(--muted); margin-bottom: 40px; font-size: 0.95rem; }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 24px;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+        .card {
+            background: var(--card);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 20px;
+            padding: 28px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            backdrop-filter: blur(20px);
+        }
+        .card-header { display: flex; align-items: center; gap: 10px; }
+        .card-emoji { font-size: 1.8rem; }
+        .card-title { font-family: 'Kanit', sans-serif; font-size: 1.15rem; font-weight: 800; }
+        .card-desc { font-size: 0.85rem; color: var(--muted); line-height: 1.6; }
+        .preview {
+            background: #0d0d25;
+            border-radius: 14px;
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .try-btn {
+            background: linear-gradient(135deg, var(--purple), var(--pink));
+            border: none;
+            border-radius: 999px;
+            color: white;
+            font-family: 'Prompt', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+            padding: 10px 28px;
+            cursor: pointer;
+            transition: all 0.2s;
+            align-self: flex-start;
+        }
+        .try-btn:hover { transform: translateY(-2px); opacity: 0.9; }
+        .try-btn:active { transform: scale(0.97); }
+        .slot-text {
+            font-family: 'Kanit', sans-serif;
+            font-weight: 900;
+            font-size: 1.8rem;
+            color: var(--gold);
+            text-align: center;
+        }
+        .slot-subtext { font-size: 0.9rem; color: #94a3b8; text-align: center; margin-top: 4px; }
+        @keyframes glitch {
+            0%   { clip-path: inset(40% 0 61% 0); transform: translate(-4px, 0); }
+            20%  { clip-path: inset(92% 0 1% 0);  transform: translate(4px, 0); }
+            40%  { clip-path: inset(43% 0 1% 0);  transform: translate(-4px, 0); }
+            60%  { clip-path: inset(25% 0 58% 0); transform: translate(4px, 0); }
+            80%  { clip-path: inset(54% 0 7% 0);  transform: translate(-4px, 0); }
+            100% { clip-path: inset(58% 0 43% 0); transform: translate(0, 0); }
+        }
+        .glitch-wrap { position: relative; display: inline-block; text-align: center; }
+        .glitch-main { font-family: 'Kanit', sans-serif; font-size: 2rem; font-weight: 900; color: var(--gold); }
+        .glitch-clone {
+            position: absolute; top: 0; left: 0; width: 100%;
+            color: var(--cyan); font-family: 'Kanit', sans-serif; font-size: 2rem; font-weight: 900; opacity: 0;
+        }
+        .glitch-clone2 {
+            position: absolute; top: 0; left: 0; width: 100%;
+            color: var(--pink); font-family: 'Kanit', sans-serif; font-size: 2rem; font-weight: 900; opacity: 0;
+        }
+        .glitch-active .glitch-clone { animation: glitch 0.3s infinite; opacity: 0.6; }
+        .glitch-active .glitch-clone2 { animation: glitch 0.3s infinite reverse; opacity: 0.4; }
+        .countdown-display {
+            font-family: 'Kanit', sans-serif; font-size: 5rem; font-weight: 900; text-align: center; line-height: 1;
+        }
+        .countdown-label { font-size: 0.85rem; color: var(--muted); text-align: center; }
+        @keyframes popIn {
+            0% { transform: scale(2); opacity: 0; }
+            50% { transform: scale(0.9); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .pop { animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .censor-name { font-family: 'Kanit', sans-serif; font-size: 1.3rem; font-weight: 700; color: var(--text); text-align: center; }
+        .censor-bar {
+            background: #1e293b; border-radius: 4px; color: transparent;
+            user-select: none; cursor: default; display: inline-block; transition: all 0.5s ease;
+        }
+        .censor-bar.revealed { background: transparent; color: var(--gold); }
+        .reveal-btn-small {
+            background: rgba(251,191,36,0.15); border: 1px solid var(--gold); border-radius: 999px;
+            color: var(--gold); font-family: 'Prompt', sans-serif; font-size: 0.8rem;
+            padding: 6px 16px; cursor: pointer; transition: all 0.2s; margin-top: 8px;
+        }
+        .reveal-btn-small:hover { background: rgba(251,191,36,0.25); }
+        .fake-announcement { font-family: 'Kanit', sans-serif; font-size: 1.5rem; font-weight: 800; text-align: center; }
+        .real-name-reveal {
+            font-family: 'Kanit', sans-serif; font-size: 2rem; font-weight: 900;
+            color: var(--gold); text-align: center; display: none;
+        }
+        .running-area { position: relative; width: 100%; height: 100px; }
+        .run-btn {
+            position: absolute;
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            border: none; border-radius: 999px; color: white;
+            font-family: 'Prompt', sans-serif; font-size: 0.85rem; font-weight: 600;
+            padding: 10px 20px; cursor: pointer;
+            transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+            white-space: nowrap; top: 50%; left: 50%; transform: translate(-50%, -50%);
+        }
+        .luck-grid { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+        .luck-row { display: flex; align-items: center; gap: 8px; }
+        .luck-label { font-size: 0.8rem; color: var(--muted); width: 90px; flex-shrink: 0; }
+        .luck-bar-wrap { flex: 1; height: 10px; background: rgba(255,255,255,0.07); border-radius: 999px; overflow: hidden; }
+        .luck-bar-fill { height: 100%; border-radius: 999px; width: 0%; transition: width 1s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .luck-val { font-size: 0.75rem; font-weight: 700; width: 32px; text-align: right; }
+        .badge { display: inline-block; font-size: 0.7rem; font-weight: 600; padding: 2px 10px; border-radius: 999px; margin-bottom: 4px; }
+        .badge-troll { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
+        .badge-fun { background: rgba(251,191,36,0.15); color: var(--gold); border: 1px solid rgba(251,191,36,0.3); }
+    </style>
+</head>
+<body>
+
+<h1>🎭 ลูกเล่นสุดกวน — Demo</h1>
+<p class="subtitle">กดปุ่ม "ลองเลย" ในแต่ละกล่องเพื่อดูตัวอย่าง</p>
+
+<div class="grid">
+
+    <!-- DEMO 1: Fake Slowdown -->
+    <div class="card">
+        <div class="card-header">
+            <span class="card-emoji">🎭</span>
+            <div>
+                <div class="badge badge-troll">สุดกวน</div>
+                <div class="card-title">Fake Slowdown</div>
+            </div>
+        </div>
+        <p class="card-desc">หมุนช้าลงจนเหมือนจะหยุด... แล้ว <strong style="color:#ef4444">สปีดอีกรอบ</strong> ก่อนหยุดจริง ทำให้ลุ้นสองชั้น</p>
+        <div class="preview">
+            <div style="text-align:center">
+                <div class="slot-text" id="d1name">?</div>
+                <div class="slot-subtext" id="d1sub">กดลองเลย</div>
+            </div>
+        </div>
+        <button class="try-btn" onclick="demoFakeSlowdown()">🎰 ลองเลย</button>
+    </div>
+
+    <!-- DEMO 2: Glitch -->
+    <div class="card">
+        <div class="card-header">
+            <span class="card-emoji">📺</span>
+            <div>
+                <div class="badge badge-fun">เท่มาก</div>
+                <div class="card-title">Glitch Effect</div>
+            </div>
+        </div>
+        <p class="card-desc">ชื่อผู้โชคดีปรากฏแบบ <strong style="color:#06b6d4">สัญญาณรบกวน</strong> ชื่อกระตุกและแตกเป็นสี ก่อนแสดงผลชัดเจน</p>
+        <div class="preview">
+            <div class="glitch-wrap" id="glitchWrap">
+                <div class="glitch-main" id="glitchMain">?</div>
+                <div class="glitch-clone" id="glitchC1">?</div>
+                <div class="glitch-clone2" id="glitchC2">?</div>
+            </div>
+        </div>
+        <button class="try-btn" onclick="demoGlitch()">📺 ลองเลย</button>
+    </div>
+
+    <!-- DEMO 3: Countdown -->
+    <div class="card">
+        <div class="card-header">
+            <span class="card-emoji">⏱️</span>
+            <div>
+                <div class="badge badge-fun">เพิ่มดราม่า</div>
+                <div class="card-title">Countdown 3-2-1</div>
+            </div>
+        </div>
+        <p class="card-desc">นับถอยหลัง <strong style="color:#fbbf24">3-2-1</strong> พร้อมเสียงบี้ป แล้วค่อย reveal ชื่อผู้โชคดี สร้างความตื่นเต้นก่อนประกาศ</p>
+        <div class="preview">
+            <div style="text-align:center">
+                <div class="countdown-display" id="d3num" style="color:var(--gold)">?</div>
+                <div class="countdown-label" id="d3label">กดลองเลย</div>
+            </div>
+        </div>
+        <button class="try-btn" onclick="demoCountdown()">⏱️ ลองเลย</button>
+    </div>
+
+    <!-- DEMO 4: Censored -->
+    <div class="card">
+        <div class="card-header">
+            <span class="card-emoji">🔒</span>
+            <div>
+                <div class="badge badge-troll">สุดกวน</div>
+                <div class="card-title">ชื่อเซ็นเซอร์</div>
+            </div>
+        </div>
+        <p class="card-desc">เฉลย <strong style="color:#fbbf24">ชื่อเล่น</strong> ก่อน ส่วนชื่อจริงถูกบล็อกไว้ — ต้องกดปุ่ม "เปิดเผย" เพื่อดูชื่อเต็ม</p>
+        <div class="preview">
+            <div style="text-align:center">
+                <div class="censor-name" style="font-size:1.8rem; color:var(--gold); margin-bottom:8px">โอปอ</div>
+                <div class="censor-name">
+                    <span class="censor-bar" id="censorBar">นางสาวมาริสา จางวาง</span>
+                </div>
+                <button class="reveal-btn-small" id="revealSmallBtn" onclick="revealCensor()">👁️ เปิดเผยชื่อจริง</button>
+            </div>
+        </div>
+        <button class="try-btn" onclick="resetCensor()">🔒 ลองเลย (รีเซ็ต)</button>
+    </div>
+
+    <!-- DEMO 5: Fake Result -->
+    <div class="card">
+        <div class="card-header">
+            <span class="card-emoji">😈</span>
+            <div>
+                <div class="badge badge-troll">กวนที่สุด</div>
+                <div class="card-title">"ขอโทษ... ล้อเล่น 😈"</div>
+            </div>
+        </div>
+        <p class="card-desc">แสดงชื่อผู้โชคดี "หลอก" ก่อน แล้ว <strong style="color:#ef4444">ปฏิเสธ</strong> พร้อมเสียง และเปิดเฉลยชื่อจริง (มีโอกาส 20%)</p>
+        <div class="preview">
+            <div style="text-align:center; width:100%">
+                <div class="fake-announcement" id="d5fake" style="color:#f87171; display:none"></div>
+                <div class="real-name-reveal" id="d5real"></div>
+                <div id="d5placeholder" style="color:var(--muted); font-size:0.9rem">กดลองเลย เพื่อดูผล</div>
+            </div>
+        </div>
+        <button class="try-btn" onclick="demoFakeResult()">😈 ลองเลย</button>
+    </div>
+
+    <!-- DEMO 6: Running Button -->
+    <div class="card">
+        <div class="card-header">
+            <span class="card-emoji">🏃</span>
+            <div>
+                <div class="badge badge-troll">สุดกวน</div>
+                <div class="card-title">ปุ่มวิ่งหนีเมาส์</div>
+            </div>
+        </div>
+        <p class="card-desc">ปุ่ม <strong style="color:#22c55e">"รับรางวัล"</strong> วิ่งหนีทุกครั้งที่เมาส์เข้าใกล้ — จะกดได้ต้องอาศัยความเร็วและสายตา</p>
+        <div class="preview" id="runPreview" style="padding:0">
+            <div class="running-area" id="runningArea">
+                <button class="run-btn" id="runBtn" onmouseover="runAway(event)">
+                    🎁 รับรางวัล!
+                </button>
+            </div>
+        </div>
+        <p style="font-size:0.75rem; color:var(--muted); text-align:center">ลองขยับเมาส์ไปที่ปุ่มเขียวด้านบน</p>
+    </div>
+
+    <!-- DEMO 7: Luck Stats -->
+    <div class="card">
+        <div class="card-header">
+            <span class="card-emoji">🔮</span>
+            <div>
+                <div class="badge badge-fun">ไร้สาระ</div>
+                <div class="card-title">กราฟดวงวันนี้</div>
+            </div>
+        </div>
+        <p class="card-desc">หลังเฉลยชื่อ แสดง <strong style="color:#a78bfa">"สถิติดวง"</strong> แบบสุ่มไร้สาระ เช่น ดวงการเรียน ดวงรัก ดวงการเงิน</p>
+        <div class="preview" style="flex-direction:column; align-items:flex-start; padding:20px">
+            <div style="font-size:0.8rem; color:var(--gold); margin-bottom:10px; font-weight:600">🔮 ดวงของ <span style="color:#a78bfa">โอปอ</span> วันนี้</div>
+            <div class="luck-grid" id="luckGrid"></div>
+        </div>
+        <button class="try-btn" onclick="demoLuck()">🔮 สุ่มดวงใหม่</button>
+    </div>
+
+    <!-- DEMO 8: Drumroll -->
+    <div class="card">
+        <div class="card-header">
+            <span class="card-emoji">🥁</span>
+            <div>
+                <div class="badge badge-fun">เพิ่มดราม่า</div>
+                <div class="card-title">Drumroll + ปิดตา</div>
+            </div>
+        </div>
+        <p class="card-desc">หลังหมุนจบ ช่องผลลัพธ์แสดง <strong style="color:#fbbf24">❓ ใครนะ?</strong> พร้อมเสียง drumroll — ต้องกดเปิดเพื่อดู</p>
+        <div class="preview" style="flex-direction:column; gap:12px">
+            <div id="d8cover" style="
+                width:100%; background:rgba(251,191,36,0.1); border:2px dashed var(--gold);
+                border-radius:14px; padding:20px; text-align:center; cursor:pointer
+            " onclick="demoRevealDrum()">
+                <div style="font-size:3rem">❓</div>
+                <div style="font-size:0.85rem; color:var(--gold); margin-top:6px">กดเพื่อเปิดเผยผู้โชคดี!</div>
+            </div>
+            <div id="d8result" style="display:none; text-align:center">
+                <div style="font-family:'Kanit',sans-serif; font-size:2rem; font-weight:900; color:var(--gold)">โอปอ 🏆</div>
+                <div style="color:#94a3b8; font-size:0.9rem">นางสาวมาริสา จางวาง</div>
+            </div>
+        </div>
+        <button class="try-btn" onclick="resetDrum()">🥁 ลองเลย (รีเซ็ต)</button>
+    </div>
+
+    <!-- DEMO 9: เกือบได้แล้ว -->
+    <div class="card">
+        <div class="card-header">
+            <span class="card-emoji">💔</span>
+            <div>
+                <div class="badge badge-troll">สุดโหด</div>
+                <div class="card-title">"เกือบได้แล้ว..."</div>
+            </div>
+        </div>
+        <p class="card-desc">หมุนช้าลงจนหยุดที่ชื่อ <strong style="color:#ef4444">หลอก</strong> ค้างไว้ 1.5 วิพร้อมเต้นเป็นจังหวะ จนทุกคนคิดว่าได้แล้ว... แล้ว <strong style="color:#fbbf24">เปลี่ยนชื่อกะทันหัน</strong> ก่อนหยุดจริง</p>
+        <div class="preview">
+            <div style="text-align:center; width:100%">
+                <div class="slot-text" id="d9name" style="font-size:2rem">?</div>
+                <div class="slot-subtext" id="d9sub">กดลองเลย</div>
+                <div id="d9heart" style="font-size:1.5rem; margin-top:4px; display:none">💓</div>
+            </div>
+        </div>
+        <button class="try-btn" onclick="demoAlmostGot()">💔 ลองเลย</button>
+    </div>
+
+</div>
+
+<script>
+let audioCtx = null;
+function getCtx() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    return audioCtx;
+}
+function beep(freq, dur, vol, type, delay) {
+    freq = freq||880; dur = dur||0.08; vol = vol||0.15; type = type||'square'; delay = delay||0;
+    try {
+        const ctx = getCtx();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, ctx.currentTime + delay);
+        gain.gain.setValueAtTime(vol, ctx.currentTime + delay);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + dur);
+        osc.start(ctx.currentTime + delay);
+        osc.stop(ctx.currentTime + delay + dur + 0.01);
+    } catch(e) {}
+}
+function playWin() { [523.25, 659.25, 783.99, 1046.5].forEach((f,i) => beep(f, 0.3, 0.2, 'sine', i*0.12)); }
+function playFail() { [400, 300, 200].forEach((f,i) => beep(f, 0.15, 0.2, 'sawtooth', i*0.12)); }
+function playDrum() {
+    for (let i = 0; i < 18; i++) {
+        const rate = i < 8 ? 0.12 : (i < 13 ? 0.08 : 0.05);
+        beep(80 + Math.random()*120, 0.06, 0.15, 'sawtooth', i*rate);
+    }
+}
+
+const NAMES = ['โอปอ', 'แบม', 'ปิง', 'เปรม', 'มิวสิค', 'ข้าวฟ่าง', 'บิว', 'เจมส์', 'ฟาง', 'แมน'];
+
+// DEMO 1: FAKE SLOWDOWN
+let d1running = false;
+function demoFakeSlowdown() {
+    if (d1running) return;
+    d1running = true;
+    const el = document.getElementById('d1name');
+    const sub = document.getElementById('d1sub');
+    el.style.color = '#f1f5f9';
+    sub.textContent = 'กำลังสุ่ม...';
+
+    let i = 0, interval = 60;
+    function phase1() {
+        el.textContent = NAMES[Math.floor(Math.random()*NAMES.length)];
+        beep(600+Math.random()*200, 0.03, 0.08);
+        if (++i < 18) setTimeout(phase1, interval);
+        else { i = 0; interval = 150; setTimeout(phase2, 100); }
+    }
+    function phase2() {
+        el.textContent = NAMES[Math.floor(Math.random()*NAMES.length)];
+        beep(400+(20-i)*15, 0.05, 0.1);
+        interval += 35;
+        if (++i < 7) setTimeout(phase2, interval);
+        else {
+            sub.textContent = '... เกือบแล้ว!';
+            setTimeout(() => {
+                sub.textContent = '😱 ยังไม่หยุด!!';
+                beep(150, 0.2, 0.2, 'sawtooth');
+                i = 0; interval = 55;
+                setTimeout(phase3, 300);
+            }, 700);
+        }
+    }
+    function phase3() {
+        el.textContent = NAMES[Math.floor(Math.random()*NAMES.length)];
+        beep(500+Math.random()*200, 0.03, 0.08);
+        interval += 25;
+        if (++i < 14) setTimeout(phase3, interval);
+        else {
+            el.textContent = 'โอปอ';
+            el.style.color = '#fbbf24';
+            sub.textContent = '🎉 ผู้โชคดี!';
+            playWin();
+            d1running = false;
+        }
+    }
+    phase1();
+}
+
+// DEMO 2: GLITCH
+function demoGlitch() {
+    const wrap = document.getElementById('glitchWrap');
+    const main = document.getElementById('glitchMain');
+    const c1 = document.getElementById('glitchC1');
+    const c2 = document.getElementById('glitchC2');
+    const name = 'โอปอ';
+    [main,c1,c2].forEach(el => { el.textContent = '???'; });
+    wrap.classList.remove('glitch-active');
+    main.style.color = '#fff';
+    beep(200, 0.3, 0.15, 'sawtooth');
+    setTimeout(() => {
+        [main,c1,c2].forEach(el => el.textContent = name);
+        wrap.classList.add('glitch-active');
+        let elapsed = 0;
+        const chars = '!@#$%กขคงจ01';
+        const intv = setInterval(() => {
+            elapsed += 50;
+            main.textContent = Math.random() > 0.4 ? name :
+                name.split('').map(c => Math.random() > 0.7 ? chars[Math.floor(Math.random()*chars.length)] : c).join('');
+            beep(150+Math.random()*300, 0.02, 0.05, 'sawtooth');
+            if (elapsed >= 1200) {
+                clearInterval(intv);
+                wrap.classList.remove('glitch-active');
+                main.textContent = name;
+                main.style.color = '#fbbf24';
+                playWin();
+            }
+        }, 50);
+    }, 400);
+}
+
+// DEMO 3: COUNTDOWN
+let d3running = false;
+function demoCountdown() {
+    if (d3running) return;
+    d3running = true;
+    const el = document.getElementById('d3num');
+    const label = document.getElementById('d3label');
+    const counts = [3, 2, 1, '🎉'];
+    const colors = ['#ef4444', '#fbbf24', '#22c55e', '#fbbf24'];
+    let i = 0;
+    function tick() {
+        el.textContent = counts[i];
+        el.style.color = colors[i];
+        el.classList.remove('pop');
+        void el.offsetWidth;
+        el.classList.add('pop');
+        if (counts[i] === '🎉') {
+            label.textContent = 'ผู้โชคดีคือ... โอปอ! 🏆';
+            playWin();
+            d3running = false;
+        } else {
+            beep(i === 2 ? 1200 : 880, 0.1, 0.2, 'sine');
+            label.textContent = 'เตรียมพร้อม...';
+            i++;
+            setTimeout(tick, 900);
+        }
+    }
+    tick();
+}
+
+// DEMO 4: CENSORED
+function revealCensor() {
+    document.getElementById('censorBar').classList.add('revealed');
+    document.getElementById('revealSmallBtn').style.display = 'none';
+    playWin();
+}
+function resetCensor() {
+    document.getElementById('censorBar').classList.remove('revealed');
+    document.getElementById('revealSmallBtn').style.display = 'inline-block';
+    beep(440, 0.1);
+}
+
+// DEMO 5: FAKE RESULT
+let d5running = false;
+function demoFakeResult() {
+    if (d5running) return;
+    d5running = true;
+    const fake = document.getElementById('d5fake');
+    const real = document.getElementById('d5real');
+    const ph = document.getElementById('d5placeholder');
+    ph.style.display = 'none';
+    fake.style.display = 'none';
+    real.style.display = 'none';
+    const fakeNames = ['เปรม','แบม','มิวสิค','บิว','ปิง'];
+    const fn = fakeNames[Math.floor(Math.random()*fakeNames.length)];
+    fake.textContent = '🎉 ผู้โชคดีคือ... ' + fn + '!';
+    fake.style.display = 'block';
+    fake.style.color = '#22c55e';
+    playWin();
+    setTimeout(() => {
+        fake.style.color = '#ef4444';
+        fake.textContent = '❌ ขอโทษ... ล้อเล่น 😈';
+        playFail();
+        setTimeout(() => {
+            fake.style.display = 'none';
+            real.textContent = '✨ โอปอ นั่นแหละ! 🏆';
+            real.style.display = 'block';
+            playWin();
+            d5running = false;
+        }, 1200);
+    }, 1500);
+}
+
+// DEMO 6: RUNNING BUTTON
+function runAway(e) {
+    const btn = document.getElementById('runBtn');
+    const area = document.getElementById('runningArea');
+    const rect = area.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+    const bw = btn.offsetWidth, bh = btn.offsetHeight;
+    const maxX = rect.width - bw, maxY = rect.height - bh;
+    let nx = mx > rect.width/2 ? Math.random()*(rect.width*0.4) : rect.width*0.5+Math.random()*(rect.width*0.4)-bw;
+    let ny = my > rect.height/2 ? Math.random()*(rect.height*0.3) : rect.height*0.5+Math.random()*(rect.height*0.4)-bh;
+    nx = Math.max(0, Math.min(nx, maxX));
+    ny = Math.max(0, Math.min(ny, maxY));
+    btn.style.left = nx+'px';
+    btn.style.top = ny+'px';
+    btn.style.transform = 'none';
+    beep(300+Math.random()*200, 0.05, 0.05);
+}
+
+// DEMO 7: LUCK
+const luckItems = [
+    { label: '📚 การเรียน', color: '#7c3aed' },
+    { label: '💕 ความรัก', color: '#ec4899' },
+    { label: '💰 การเงิน', color: '#fbbf24' },
+    { label: '😴 ดวงนอน', color: '#06b6d4' },
+    { label: '🍜 ดวงกิน', color: '#22c55e' },
+    { label: '🎲 โชคลาภ', color: '#f59e0b' },
+];
+function demoLuck() {
+    const grid = document.getElementById('luckGrid');
+    grid.innerHTML = '';
+    luckItems.forEach(item => {
+        const val = Math.floor(Math.random()*61)+40;
+        const row = document.createElement('div');
+        row.className = 'luck-row';
+        row.innerHTML = `
+            <div class="luck-label">${item.label}</div>
+            <div class="luck-bar-wrap">
+                <div class="luck-bar-fill" style="background:${item.color}" data-val="${val}"></div>
+            </div>
+            <div class="luck-val" style="color:${item.color}">${val}</div>
+        `;
+        grid.appendChild(row);
+    });
+    requestAnimationFrame(() => {
+        document.querySelectorAll('.luck-bar-fill').forEach(el => {
+            el.style.width = el.dataset.val+'%';
+        });
+    });
+    beep(440, 0.1, 0.1, 'sine');
+}
+demoLuck();
+
+// DEMO 8: DRUMROLL
+function demoRevealDrum() {
+    const cover = document.getElementById('d8cover');
+    const result = document.getElementById('d8result');
+    if (cover.style.display === 'none') return;
+    cover.querySelector('div').textContent = '🥁';
+    cover.querySelector('div:last-child').textContent = 'กำลังเปิดเผย...';
+    playDrum();
+    setTimeout(() => {
+        cover.style.display = 'none';
+        result.style.display = 'block';
+        playWin();
+    }, 1800);
+}
+function resetDrum() {
+    const cover = document.getElementById('d8cover');
+    const result = document.getElementById('d8result');
+    cover.style.display = 'block';
+    cover.querySelector('div').textContent = '❓';
+    cover.querySelector('div:last-child').textContent = 'กดเพื่อเปิดเผยผู้โชคดี!';
+    result.style.display = 'none';
+    beep(440, 0.1);
+}
+
+// DEMO 9: "เกือบได้แล้ว..."
+let d9running = false;
+function demoAlmostGot() {
+    if (d9running) return;
+    d9running = true;
+    const el = document.getElementById('d9name');
+    const sub = document.getElementById('d9sub');
+    const heart = document.getElementById('d9heart');
+    el.style.color = '#f1f5f9';
+    heart.style.display = 'none';
+    sub.textContent = 'กำลังสุ่ม...';
+
+    const fakeWinner = 'แบม';
+    const realWinner = 'โอปอ';
+    const decoys = ['เปรม','ปิง','มิวสิค','บิว','ฟาง','แมน','เจมส์','ดาด้า','ข้าวฟ่าง'];
+
+    let i = 0, interval = 55;
+
+    // Phase 1: fast spin
+    function phase1() {
+        el.textContent = decoys[Math.floor(Math.random()*decoys.length)];
+        beep(500+Math.random()*250, 0.025, 0.07);
+        interval += 3;
+        if (++i < 22) setTimeout(phase1, interval);
+        else { i = 0; interval = 160; setTimeout(phase2, 100); }
+    }
+
+    // Phase 2: slow toward fake winner
+    function phase2() {
+        el.textContent = decoys[Math.floor(Math.random()*decoys.length)];
+        beep(350+(10-i)*20, 0.06, 0.1);
+        interval += 45;
+        if (++i < 6) setTimeout(phase2, interval);
+        else {
+            // "หยุด" ที่ชื่อหลอก
+            el.textContent = fakeWinner;
+            el.style.color = '#fbbf24';
+            sub.textContent = '...เกือบได้แล้วนะ?';
+            heart.style.display = 'block';
+            beep(700, 0.15, 0.15, 'sine');
+
+            // หัวใจเต้น 3 ครั้ง
+            let hb = 0;
+            const hbIntv = setInterval(() => {
+                heart.style.transform = hb % 2 === 0 ? 'scale(1.4)' : 'scale(1)';
+                beep(hb % 2 === 0 ? 220 : 180, 0.05, 0.08, 'sine');
+                if (++hb >= 6) {
+                    clearInterval(hbIntv);
+                    setTimeout(phase3, 300);
+                }
+            }, 250);
+        }
+    }
+
+    // Phase 3: PLOT TWIST — เปลี่ยนชื่อกะทันหัน!
+    function phase3() {
+        heart.style.display = 'none';
+        heart.style.transform = 'scale(1)';
+        sub.textContent = '😱 ยังไม่ใช่!!';
+        el.style.color = '#ef4444';
+        // สั่นสะเทือน
+        el.style.animation = 'none';
+        beep(180, 0.2, 0.2, 'sawtooth');
+
+        // วิ่งอีก 5 ชื่อเร็วๆ
+        i = 0;
+        function jolt() {
+            el.textContent = decoys[Math.floor(Math.random()*decoys.length)];
+            el.style.color = i % 2 === 0 ? '#ef4444' : '#fff';
+            beep(300+Math.random()*300, 0.03, 0.1);
+            if (++i < 8) setTimeout(jolt, 80);
+            else {
+                // ผู้โชคดีจริง
+                el.textContent = realWinner;
+                el.style.color = '#fbbf24';
+                sub.textContent = '🏆 นี่แหละตัวจริง!';
+                playWin();
+                d9running = false;
+            }
+        }
+        setTimeout(jolt, 400);
+    }
+
+    phase1();
+}
+</script>
+</body>
+</html>
