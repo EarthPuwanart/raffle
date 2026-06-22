@@ -248,7 +248,7 @@ function playTick(pitch = 880, duration = 0.04, vol = 0.12, type = 'square') {
 
 function playWinFanfare() {
     try {
-        const audio = new Audio('Congratulations.mp3');
+        const audio = new Audio('Victory.mp3');
         audio.volume = 0.7;
         audio.play();
     } catch (e) {}
