@@ -309,21 +309,19 @@ function startSpin() {
     // 3. Build the sequence of targets (stops)
     const sequence = [];
     for (let j = 0; j < N; j++) {
-        let decoy;
-        const r = Math.random();
-        if (j === 0 && r < 0.35) {
-            // 35% chance the very first stop is the actual winner (หลอกให้ดีใจแล้วเปลี่ยน แล้วค่อยกลับมา)
-            decoy = winner;
-        } else if (j > 0 && r < 0.35) {
-            // 35% chance subsequent stops reuse the first decoy name
-            decoy = sequence[0];
-        } else {
-            // Otherwise, pick a random person
-            decoy = available[Math.floor(Math.random() * available.length)];
-        }
-        sequence.push(decoy);
+        sequence.push(available[Math.floor(Math.random() * available.length)]);
     }
     sequence.push(winner); // The final stop is always the real winner
+
+    // 4. "การหลอกครั้งที่ 2 เป็นต้นไป มีโอกาส 50% ที่จะกลับไปชื่อก่อนหน้า"
+    // By passing backwards, for each stop (from end to 2nd stop), 
+    // there's a 50% chance the previous stop is changed to be identical to this one.
+    // This perfectly implements: Stop A -> Fakeout -> Stop A.
+    for (let j = N; j >= 1; j--) {
+        if (Math.random() < 0.5) {
+            sequence[j - 1] = sequence[j];
+        }
+    }
 
     let currentStopIndex = 0;
     let i_tick = 0;
