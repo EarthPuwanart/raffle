@@ -294,18 +294,42 @@ function startSpin() {
     // Scroll to slot display area smoothly
     document.getElementById('slotSection').scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-    // Pick the real winner upfront
+    // 1. Determine the actual winner upfront
     const winner = available[Math.floor(Math.random() * available.length)];
 
-    // Pick a decoy (different from the real winner)
-    const decoyPool = available.filter(s => s.id !== winner.id);
-    const decoy = decoyPool.length > 0
-        ? decoyPool[Math.floor(Math.random() * decoyPool.length)]
-        : winner;
+    // 2. Determine number of fakeouts (N)
+    // 50% chance for first fakeout, then halves each time (25%, 12.5%, ...)
+    let N = 0;
+    let prob = 0.5;
+    while (Math.random() < prob) {
+        N++;
+        prob /= 2;
+    }
 
-    let i = 0, interval = 55;
+    // 3. Build the sequence of targets (stops)
+    const sequence = [];
+    for (let j = 0; j < N; j++) {
+        let decoy;
+        const r = Math.random();
+        if (j === 0 && r < 0.35) {
+            // 35% chance the very first stop is the actual winner (หลอกให้ดีใจแล้วเปลี่ยน แล้วค่อยกลับมา)
+            decoy = winner;
+        } else if (j > 0 && r < 0.35) {
+            // 35% chance subsequent stops reuse the first decoy name
+            decoy = sequence[0];
+        } else {
+            // Otherwise, pick a random person
+            decoy = available[Math.floor(Math.random() * available.length)];
+        }
+        sequence.push(decoy);
+    }
+    sequence.push(winner); // The final stop is always the real winner
 
-    // ── Phase 1: Fast spin ──────────────────────────────────────
+    let currentStopIndex = 0;
+    let i_tick = 0;
+    let interval = 55;
+
+    // ── Phase 1: Fast spin (Only at the very beginning) ────────────────
     function phase1() {
         const s = available[Math.floor(Math.random() * available.length)];
         slotDisplay.innerHTML = `
@@ -315,11 +339,11 @@ function startSpin() {
             </div>`;
         playTick(600 + Math.random() * 250, 0.025);
         interval += 2;
-        if (++i < 22) setTimeout(phase1, interval);
-        else { i = 0; interval = 150; setTimeout(phase2, 80); }
+        if (++i_tick < 22) setTimeout(phase1, interval);
+        else { i_tick = 0; interval = 150; setTimeout(phase2, 80); }
     }
 
-    // ── Phase 2: Slow toward the DECOY ──────────────────────────
+    // ── Phase 2: Slow toward the current target ──────────────────────────
     function phase2() {
         const s = available[Math.floor(Math.random() * available.length)];
         slotDisplay.innerHTML = `
@@ -327,23 +351,42 @@ function startSpin() {
                 <div class="spinning-nickname">${s.nickname}</div>
                 <div class="spinning-name">${s.name}</div>
             </div>`;
-        playTick(350 + (8 - i) * 20, 0.06);
+        playTick(350 + (8 - i_tick) * 20, 0.06);
         interval += 50;
-        if (++i < 6) setTimeout(phase2, interval);
+        if (++i_tick < 6) setTimeout(phase2, interval);
         else {
-            // "Stop" at decoy — apply gold glow on the display container itself
+            // "Stop" at the current target in sequence
+            const target = sequence[currentStopIndex];
             slotDisplay.classList.add('state-decoy');
             slotDisplay.innerHTML = `
                 <div class="slot-spinning slot-decoy">
-                    <div class="spinning-nickname decoy-glow">${decoy.nickname}</div>
-                    <div class="spinning-name">${decoy.name}</div>
+                    <div class="spinning-nickname decoy-glow">${target.nickname}</div>
+                    <div class="spinning-name">${target.name}</div>
                 </div>`;
             playTick(700, 0.15);
-            setTimeout(phase4_plottwist, 1800);
+            setTimeout(phase3_decide, 1800);
         }
     }
 
-    // ── Phase 4: PLOT TWIST 😱 ───────────────────────────────────
+    // ── Phase 3: Decide if this is the final winner or a fakeout ────────
+    function phase3_decide() {
+        if (currentStopIndex >= sequence.length - 1) {
+            // This is the real final winner!
+            slotDisplay.classList.remove('state-decoy', 'state-plottwist');
+            const finalTarget = sequence[currentStopIndex];
+            slotDisplay.innerHTML = `
+                <div class="slot-spinning">
+                    <div class="spinning-nickname">${finalTarget.nickname}</div>
+                    <div class="spinning-name">${finalTarget.name}</div>
+                </div>`;
+            setTimeout(() => revealWinner(finalTarget), 200);
+        } else {
+            // PLOT TWIST! Proceed to fakeout animation
+            phase4_plottwist();
+        }
+    }
+
+    // ── Phase 4: PLOT TWIST 😱 ───────────────────────────────────────────
     function phase4_plottwist() {
         slotDisplay.classList.remove('state-decoy');
         slotDisplay.classList.add('state-plottwist');
@@ -355,14 +398,14 @@ function startSpin() {
         playTick(160, 0.25, 0.2, 'sawtooth');
         setTimeout(() => playTick(130, 0.2, 0.15, 'sawtooth'), 120);
 
-        i = 0;
+        i_tick = 0;
         setTimeout(phase5_jolt, 450);
     }
 
-    // ── Phase 5: Quick jolt through a few names → real winner ───
+    // ── Phase 5: Quick jolt then continue to next target ─────────────────
     function phase5_jolt() {
         const s = available[Math.floor(Math.random() * available.length)];
-        const flash = i % 2 === 0;
+        const flash = i_tick % 2 === 0;
         // Alternate red/purple glow on the container
         slotDisplay.classList.toggle('state-plottwist', flash);
         slotDisplay.innerHTML = `
@@ -371,16 +414,15 @@ function startSpin() {
                 <div class="spinning-name">${s.name}</div>
             </div>`;
         playTick(300 + Math.random() * 300, 0.03, 0.1);
-        if (++i < 9) setTimeout(phase5_jolt, 75);
-        else {
-            // Land on the REAL winner — clear all states
-            slotDisplay.classList.remove('state-decoy', 'state-plottwist');
-            slotDisplay.innerHTML = `
-                <div class="slot-spinning">
-                    <div class="spinning-nickname">${winner.nickname}</div>
-                    <div class="spinning-name">${winner.name}</div>
-                </div>`;
-            setTimeout(() => revealWinner(winner), 350);
+        if (++i_tick < 9) {
+            setTimeout(phase5_jolt, 75);
+        } else {
+            // Begin slowing down for the NEXT target
+            slotDisplay.classList.remove('state-plottwist');
+            currentStopIndex++;
+            i_tick = 0;
+            interval = 80; // slightly faster initial interval for the subsequent slow-downs
+            phase2();
         }
     }
 
